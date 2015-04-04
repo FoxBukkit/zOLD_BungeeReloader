@@ -70,9 +70,12 @@ public class Instance {
                 .start().waitFor();
 
         process = new ProcessBuilder(
-                Main.javaExec, "-Dbungee.epoll=true", "-Djava.awt.headless=true",
+                Main.javaExec, "-d64", "-server", "-Xmx256M",
+                "-Dbungee.epoll=true", "-Djava.awt.headless=true",
                 "-Djline.terminal=jline.UnsupportedTerminal",
-                "-Xmx256M", "-jar", "custom.jar"
+                "-Djava.net.preferIPv4Stack=true",
+                "-XX:+UseLargePages",
+                "-jar", "BungeeCord.jar"
         )
                 .directory(instanceDir)
                 .redirectError(ProcessBuilder.Redirect.INHERIT)
