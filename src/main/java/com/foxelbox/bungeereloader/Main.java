@@ -40,7 +40,7 @@ public class Main {
         javaExec = new File(new File(System.getProperty("java.home")), "bin/java").getCanonicalPath();
 
         sourceDir = new File("deploy");
-        final File stopFile = new File(sourceDir, "add_restart_if_empty");
+        final File stopFile = new File(sourceDir, "restart_if_empty");
 
         initRestart();
 
