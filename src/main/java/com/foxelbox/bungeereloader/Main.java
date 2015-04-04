@@ -57,6 +57,9 @@ public class Main {
 
         sourceDir = new File("deploy");
         final File stopFile = new File(sourceDir, "restart_if_empty");
+        if(stopFile.exists()) {
+            stopFile.delete();
+        }
 
         initRestart();
 
