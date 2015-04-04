@@ -83,6 +83,8 @@ public class Main {
                 line = line.trim();
                 if (line.equalsIgnoreCase("zeroreload")) {
                     initRestart();
+                } else if(line.equalsIgnoreCase("end")) {
+                    System.exit(0);
                 } else if(!line.isEmpty()) {
                     try {
                         Instance.active.feedStdin(line);
