@@ -70,8 +70,10 @@ public class Instance {
                 .start().waitFor();
 
         process = new ProcessBuilder(
-                Main.javaExec, "-d64", "-server", "-Xmx256M",
-                "-Dbungee.epoll=true", "-Djava.awt.headless=true",
+                Main.javaExec,
+                "-d64", "-server", "-Xmx256M",
+                "-Dbungee.epoll=" + (Main.epoll ? "true" : "false"),
+                "-Djava.awt.headless=true",
                 "-Djline.terminal=jline.UnsupportedTerminal",
                 "-Djava.net.preferIPv4Stack=true",
                 "-XX:+UseLargePages",
@@ -88,7 +90,7 @@ public class Instance {
         shouldRunThread = new ShouldRunThread();
     }
 
-    void stop() throws Exception {
+    void stop(boolean wait) throws Exception {
         if(shouldRunThread != null) {
             shouldRunThread.shouldRun = false;
             shouldRunThread.join();
@@ -101,8 +103,23 @@ public class Instance {
             e.printStackTrace();
         }
 
-        process.waitFor();
-        free.add(this);
+        final Runnable waitRunnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    process.waitFor();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                free.add(Instance.this);
+            }
+        };
+
+        if(wait) {
+            waitRunnable.run();
+        } else {
+            new Thread(waitRunnable).start();
+        }
     }
 
     void feedStdin(String str) throws Exception {

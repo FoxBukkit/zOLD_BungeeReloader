@@ -20,6 +20,8 @@ import java.io.*;
 import java.util.Scanner;
 
 public class Main {
+    public static final boolean epoll = System.getProperty("bungee.epoll", "false").equalsIgnoreCase("true");
+
     static File sourceDir;
     static String javaExec;
 
@@ -31,18 +33,28 @@ public class Main {
         }
         isRestarting = true;
 
-        final Instance currentInstance = Instance.active;
-        Instance.active = Instance.free.poll();
-        if(Instance.active == null) {
-            Instance.active = new Instance(new File("inst" + highestNumber++));
-        }
-        Instance.active.start();
-
         new Thread() {
             public void run() {
                 try {
-                    if (currentInstance != null) {
-                        currentInstance.stop();
+                    final Instance currentInstance = Instance.active;
+                    Instance.active = Instance.free.poll();
+                    if(Instance.active == null) {
+                        Instance.active = new Instance(new File("inst" + highestNumber++));
+                    }
+
+                    if(epoll) {
+                        //First start new bungee, then stop listeners (epoll = true)
+                        Instance.active.start();
+                        if (currentInstance != null) {
+                            currentInstance.stop(true);
+                        }
+                    } else {
+                        //First stop listeners, then start new bungee (epoll = false)
+                        if (currentInstance != null) {
+                            currentInstance.stop(false);
+                            Thread.sleep(3000);
+                        }
+                        Instance.active.start();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
